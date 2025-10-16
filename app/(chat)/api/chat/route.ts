@@ -24,7 +24,10 @@ import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { falAI } from "@/lib/ai/tools/fal-ai";
+import { fastLightningSDXL } from "@/lib/ai/tools/fast-lightning-sdxl";
+import { fastSvdLcm } from "@/lib/ai/tools/fast-svd-lcm";
 import { getWeather } from "@/lib/ai/tools/get-weather";
+import { nanoBananaEdit } from "@/lib/ai/tools/nano-banana-edit";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -196,11 +199,18 @@ export async function POST(request: Request) {
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
-              : ["getWeather", "falAI"],
+              : [
+                "getWeather",
+                "fastLightningSDXL",
+                "fastSvdLcm",
+                "nanoBananaEdit",
+              ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
-            falAI,
+            fastLightningSDXL,
+            fastSvdLcm,
+            nanoBananaEdit,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
