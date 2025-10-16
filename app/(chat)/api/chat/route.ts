@@ -22,14 +22,13 @@ import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { falAI } from "@/lib/ai/tools/fal-ai";
+import { briaBackgroundRemove } from "@/lib/ai/tools/bria-background-remove";
 import { fastLightningSDXL } from "@/lib/ai/tools/fast-lightning-sdxl";
 import { fastSvdLcm } from "@/lib/ai/tools/fast-svd-lcm";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { nanoBananaEdit } from "@/lib/ai/tools/nano-banana-edit";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
+import { playaiTtsDialog } from "@/lib/ai/tools/playai-tts-dialog";
+import { recraftV3TextToImage } from "@/lib/ai/tools/recraft-v3-text-to-image";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -191,26 +190,32 @@ export async function POST(request: Request) {
           providerOptions:
             selectedChatModel === "chat-model-reasoning"
               ? {
-                anthropic: {
-                  thinking: { type: "enabled", budgetTokens: 15_000 },
-                },
-              }
+                  anthropic: {
+                    thinking: { type: "enabled", budgetTokens: 15_000 },
+                  },
+                }
               : undefined,
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                "getWeather",
-                "fastLightningSDXL",
-                "fastSvdLcm",
-                "nanoBananaEdit",
-              ],
+                  "getWeather",
+                  "fastLightningSDXL",
+                  "fastSvdLcm",
+                  "nanoBananaEdit",
+                  "briaBackgroundRemove",
+                  "playaiTtsDialog",
+                  "recraftV3TextToImage",
+                ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
             fastLightningSDXL,
             fastSvdLcm,
             nanoBananaEdit,
+            briaBackgroundRemove,
+            playaiTtsDialog,
+            recraftV3TextToImage,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

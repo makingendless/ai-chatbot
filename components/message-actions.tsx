@@ -3,6 +3,7 @@ import { memo } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
+import { Badge } from "@/components/ui/badge";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
@@ -33,6 +34,59 @@ export function PureMessageActions({
     .map((part) => part.text)
     .join("\n")
     .trim();
+
+  const getToolDisplayName = (name: string) => {
+    const map: Record<string, string> = {
+      getWeather: "Get Weather",
+      fastLightningSDXL: "Fast Lightning SDXL",
+      fastSvdLcm: "Fast SVD LCM",
+      nanoBananaEdit: "Nano Banana Edit",
+      briaBackgroundRemove: "Bria Background Remove",
+      playaiTtsDialog: "PlayAI TTS Dialog",
+      recraftV3TextToImage: "Recraft V3 Text to Image",
+      createDocument: "Create Document",
+      updateDocument: "Update Document",
+      requestSuggestions: "Request Suggestions",
+    };
+    return map[name] || name;
+  };
+
+  const getToolEmoji = (name: string) => {
+    const map: Record<string, string> = {
+      getWeather: "🌤️",
+      fastLightningSDXL: "⚡️🖼️",
+      fastSvdLcm: "⚙️🖼️",
+      nanoBananaEdit: "🍌✏️",
+      briaBackgroundRemove: "🪄",
+      playaiTtsDialog: "🔊",
+      recraftV3TextToImage: "🎨",
+      createDocument: "📝",
+      updateDocument: "✏️",
+      requestSuggestions: "💡",
+    };
+    return map[name] || "🛠️";
+  };
+
+  const toolNames = Array.from(
+    new Set(
+      message.parts
+        .map((part) => {
+          const type = part?.type as string | undefined;
+          if (typeof type === "string" && type.startsWith("tool-")) {
+            return type.slice(5);
+          }
+          if (
+            (type === "tool-result" || type === "tool-call") &&
+            "toolName" in part &&
+            typeof part?.toolName === "string"
+          ) {
+            return part.toolName as string;
+          }
+          return null;
+        })
+        .filter((v) => v !== null)
+    )
+  );
 
   const handleCopy = async () => {
     if (!textFromParts) {
@@ -168,6 +222,20 @@ export function PureMessageActions({
         tooltip="Downvote Response"
       >
         <ThumbDownIcon />
+        {toolNames.length > 0 && (
+          <div className="ml-1 flex items-center gap-1">
+            {toolNames.map((name) => (
+              <Badge
+                className="h-8 rounded-full px-4 text-xs"
+                key={name}
+                variant="secondary"
+              >
+                <span className="mr-1">{getToolEmoji(name)}</span>
+                {getToolDisplayName(name)}
+              </Badge>
+            ))}
+          </div>
+        )}
       </Action>
     </Actions>
   );
@@ -180,6 +248,9 @@ export const MessageActions = memo(
       return false;
     }
     if (prevProps.isLoading !== nextProps.isLoading) {
+      return false;
+    }
+    if (!equal(prevProps.message.parts, nextProps.message.parts)) {
       return false;
     }
 
