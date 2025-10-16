@@ -180,15 +180,27 @@ export async function POST(request: Request) {
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
+          headers:
+            selectedChatModel === "chat-model-reasoning"
+              ? { "anthropic-beta": "interleaved-thinking-2025-05-14" }
+              : undefined,
+          providerOptions:
+            selectedChatModel === "chat-model-reasoning"
+              ? {
+                anthropic: {
+                  thinking: { type: "enabled", budgetTokens: 15_000 },
+                },
+              }
+              : undefined,
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                  "getWeather",
-                  "createDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                ],
+                "getWeather",
+                "createDocument",
+                "updateDocument",
+                "requestSuggestions",
+              ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
