@@ -190,23 +190,23 @@ export async function POST(request: Request) {
           providerOptions:
             selectedChatModel === "chat-model-reasoning"
               ? {
-                  anthropic: {
-                    thinking: { type: "enabled", budgetTokens: 15_000 },
-                  },
-                }
+                anthropic: {
+                  thinking: { type: "enabled", budgetTokens: 15_000 },
+                },
+              }
               : undefined,
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                  "getWeather",
-                  "fastLightningSDXL",
-                  "fastSvdLcm",
-                  "nanoBananaEdit",
-                  "briaBackgroundRemove",
-                  "playaiTtsDialog",
-                  "recraftV3TextToImage",
-                ],
+                "getWeather",
+                "fastLightningSDXL",
+                "fastSvdLcm",
+                "nanoBananaEdit",
+                "briaBackgroundRemove",
+                "playaiTtsDialog",
+                "recraftV3TextToImage",
+              ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
